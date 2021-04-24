@@ -1,15 +1,15 @@
 CC = gcc
 CFLAGS = -g -Wall -o
-LIBS = -lm
+LIBS = -lm -lpthread
 
-CFILES = ./src/tcp_server.c main.c
-HDIR = ./inc/
+CFILES = ./src/tcp_server.c ./src/broker.c ./driv/gen_alg.c main.c
+HDIR = -I./inc/ -I./driv/
 OUTFILE = main
 
 all: app
 
 app:
-	$(CC) $(CFLAGS) $(OUTFILE) $(CFILES) $(LIBS) -I$(HDIR).
+	$(CC) $(CFLAGS) $(OUTFILE) $(CFILES) $(LIBS) $(HDIR)
 
 clear:
 	rm *.o

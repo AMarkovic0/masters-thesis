@@ -7,6 +7,10 @@ struct sockaddr_in serverAddr;
 
 uint8_t tcp_server_init( char* ip , unsigned int port , _logs log )
 {
+	uint8_t check_var = 0;
+
+	signal( SIGPIPE , SIG_IGN ); // block SIGPIPE signal in case client disconnect
+
 	sockfd = socket( PF_INET , SOCK_STREAM , 0 );
 	if( log && ( -1 == sockfd ) )
 	{
@@ -26,24 +30,25 @@ uint8_t tcp_server_init( char* ip , unsigned int port , _logs log )
 	serverAddr.sin_port = htons( port );
 	serverAddr.sin_addr.s_addr = inet_addr( ip );
 
-	if( bind( sockfd , ( struct sockaddr* )&serverAddr , sizeof( serverAddr ) ) && log )
+	check_var = bind( sockfd , ( struct sockaddr* )&serverAddr , sizeof( serverAddr ) );
+	if( check_var && log )
 	{
 		printf( "Bind failed %d. \r\n" , errno );
 		return -1;
 	}
-	else if( bind( sockfd , ( struct sockaddr* )&serverAddr , sizeof( serverAddr ) ) && !log )
+	else if( check_var && !log )
 	{
 		return -1;
 	}
-	else if( !bind( sockfd , ( struct sockaddr* )&serverAddr , sizeof( serverAddr ) ) && log )
-		printf( "Bind sucessfull" );
+	else if( !check_var && log )
+		printf( "Bind sucessfull \r\n" );
 
 	return -1;
 }
 
 uint8_t tcp_server_listen( _logs log )
 {
-	int check = listen( sockfd , NUM_OF_DEVICES );
+	uint8_t check = listen( sockfd , NUM_OF_DEVICES );
 	if( check && log )
 	{
 		printf( "Listen failed. \r\n" );
@@ -53,7 +58,7 @@ uint8_t tcp_server_listen( _logs log )
 	{
 		return -1;
 	}
-	else if( log )
+	else if( !check && log )
 		printf( "Server listening... \r\n" );
 
 	return 1;
