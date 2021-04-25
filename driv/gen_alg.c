@@ -269,9 +269,10 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 void* gen_alg_driv_exec( void* vargp )
 {
 	char msgq[ 255 ] = { '\0' };
-        // Random seed
         clock_t t_begin = clock();
-        srand((int32_t)time(0));
+
+	drivAPI_init_driver( vargp , "DRIVER1" );
+	srand((int32_t)time(0));
 
         // Initialize population and selected chromosome arrays
         _chromosome population[GENERATION_SIZE];
@@ -279,6 +280,10 @@ void* gen_alg_driv_exec( void* vargp )
 
         // Initialize global best chromosome
         _chromosome GLOBAL_BEST;
+
+	while( 0 == strlen( msgq ) )
+		drivAPI_read_network( msgq );
+	printf( "%s \r\n" , msgq );
 
         // Perform algorithm and find global best chromosome
         GLOBAL_BEST = best_global_chromosome(population, selected, &calculate_fitness);
@@ -298,7 +303,7 @@ void* gen_alg_driv_exec( void* vargp )
 			GLOBAL_BEST.genetic_code[ 0 ] ,
 			GLOBAL_BEST.genetic_code[ 1 ] ,
 			GLOBAL_BEST.genetic_code[ 2 ] );
-	brokerQ_push( 1 , 1 ,  msgq );
+	drivAPI_send_broker( "DRIVER0" , msgq );
 
         // Execute genetic algorithm
         return NULL;
