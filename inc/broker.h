@@ -6,6 +6,7 @@
 #include<stdint.h>
 #include<string.h>
 #include<pthread.h>
+#include<sys/types.h>
 
 #define BUF_SIZE 255
 #define NAME_SIZE 32
@@ -15,6 +16,7 @@ typedef enum driver_states{ BORN , HANDSHAKE , INIT , READY , CLOSED }drivstat_t
 typedef struct drivers_list
 {
 	int driver_id;
+	pthread_t thread_id;
 	char name[ NAME_SIZE ];
 	char msg[ BUF_SIZE ];
 	struct drivers_list* next;
@@ -40,7 +42,7 @@ void brokerQ_push( int from , int to , char msg[ ] );
 int brokerQ_pop( char* msg );
 uint8_t brokerQ_isempty( void );
 
-void drivList_add( int driver_id , char name[ ] );
+void drivList_add( int driver_id , pthread_t thread_id , char name[ ] );
 pthread_t drivList_del( char name[ ] );
 _drivList drivList_find( char name[ ] );
 

@@ -33,6 +33,7 @@ void brokerQ_push( int from , int to , char msg[ ] )
 	{
 		broker.head = ( _drivMsg* )calloc( 1 , sizeof( _drivMsg ) );
 		broker.head->to = to;
+		broker.head->from = from;
 		strcpy( broker.head->msg , msg );
 		broker.head->next = NULL;
 		broker.size++;
@@ -49,6 +50,7 @@ void brokerQ_push( int from , int to , char msg[ ] )
 	}
 	tmp->next = ( _drivMsg* )calloc( 1 , sizeof( _drivMsg ) );
 	tmp->next->to = to;
+	tmp->next->from = from;
 	strcpy( tmp->next->msg , msg );
 	tmp->next->next = NULL;
 	broker.size++;
@@ -66,7 +68,7 @@ int brokerQ_pop( char* msg )
 
 	pthread_mutex_lock( &lockQ );
 
-	strcpy( msg , broker.head->msg );
+	sprintf( msg , "<%s><%d><%d>" , broker.head->msg , broker.head->from ,broker.head->to );
 	_drivMsg* next = broker.head->next;
 	free( broker.head );
 	broker.head = next;
@@ -82,7 +84,7 @@ uint8_t brokerQ_isempty( void )
 	return ( 0 == broker.size );
 }
 
-void drivList_add( int driver_id , char name[ ] )
+void drivList_add( int driver_id , pthread_t thread_id , char name[ ] )
 {
 	pthread_mutex_lock( &lockList );
 
@@ -90,6 +92,7 @@ void drivList_add( int driver_id , char name[ ] )
 	{
 		_drivList* tmp = (_drivList*)calloc( 1 , sizeof( _drivList ) );
 		tmp->driver_id = driver_id;
+		tmp->thread_id = thread_id;
 		strcpy( tmp->name , name );
 		tmp->next = drivers_list;
 		drivers_list = tmp;
@@ -105,6 +108,7 @@ void drivList_add( int driver_id , char name[ ] )
 
 	tmp->next = (_drivList*)calloc( 1 , sizeof( _drivList ) );
 	tmp->next->driver_id = driver_id;
+	tmp->thread_id = thread_id;
 	strcpy( tmp->next->name , name );
 
 	pthread_mutex_unlock( &lockList );
