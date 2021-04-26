@@ -1,7 +1,5 @@
 #include "tcp_server.h"
 
-const uint8_t NUM_OF_DEVICES = 10;
-
 int sockfd;
 struct sockaddr_in serverAddr;
 

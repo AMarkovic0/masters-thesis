@@ -2,9 +2,6 @@
 #include<sys/time.h>
 #include <sys/wait.h>
 
-#include "tcp_server.h"
-#include "broker.h"
-
 #include "drivers.h"
 
 #define PORT		54321u
@@ -13,12 +10,12 @@ char myIP[ MAX_IP_SIZE ];
 
 void* broker_exec( void* vargp );
 
+pthread_t thread_id[ NUM_OF_DEVICES ];
+int newSocket[ NUM_OF_DEVICES ];
+struct sockaddr_in newAddr[ NUM_OF_DEVICES ];
+
 int main( int argc , char* argv[ ] )
 {
-	pthread_t thread_id[ NUM_OF_DEVICES ];
-	int newSocket[ NUM_OF_DEVICES ];
-	struct sockaddr_in newAddr[ NUM_OF_DEVICES ];
-
 	getIP( myIP , LOG_ON );
 	broker_setup( );
 
@@ -27,38 +24,41 @@ int main( int argc , char* argv[ ] )
 
 	pthread_create( &thread_id[ 0 ] , NULL , &broker_exec , NULL );
 
-	char str[100];
-	for( int i = 0 ; i < NUM_OF_DEVICES ; i++ )
+	for( int i = 1 ; i < NUM_OF_DEVICES ; i++ )
 	{
 		tcp_server_accept( &newSocket[ i ] , &newAddr[ i ] , LOG_ON );
-		printf( "Client Adress = %s \r\n",
-			inet_ntop(AF_INET,&newAddr[i].sin_addr,str,sizeof(str)) );
-		pthread_create( &thread_id[ 1 ] , NULL , &gen_alg_driv_exec , (void*)&newSocket[ i ] );
+		pthread_create( &thread_id[ i ] , NULL , &gen_alg_driv_exec , (void*)&newSocket[ i ] );
+		printf( "THREAD ID : %lu \r\n" , (uint64_t)thread_id[ i ] );
 		sleep( 0.4 );
 	}
 
-	pthread_join( thread_id[ 0 ] , NULL );
-	pthread_join( thread_id[ 1 ] , NULL );
-
+	for( int i = 0 ; i < NUM_OF_DEVICES ; i++ )
+		pthread_join( thread_id[ i ] , NULL );
 
 	return 0;
 }
 
 void* broker_exec( void* vargp )
 {
-	char msg[ BUF_SIZE ] = { '\0' };
-
+	char rmsg[ BUF_SIZE ] = { '\0' };
+	_drivList driver;
 	while( 1 )
 	{
 		if( !brokerQ_isempty( ) )
 		{
-			brokerQ_pop( msg );
-			if( 0 != msg[ 0 ] )
+			brokerQ_pop( rmsg );
+			if( 0 != rmsg[ 0 ] )
 			{
-				printf( "%s" , msg );
-				memset( msg, 0 , sizeof( msg ) );
+				printf( "%s" , rmsg );
+				memset( rmsg, 0 , sizeof( rmsg ) );
 				// Parse XML/JSON
 			}
+			else
+			{
+				driver = drivList_find( "D1" );
+				pthread_kill( thread_id[ 1 ] , 99 );
+			}
+			sleep( 1 );
 		}
 	}
 

@@ -21,6 +21,7 @@
 #define MAX_IP_SIZE 15
 #define BUF_SIZE 255
 #define WIFI_INTERFACE "wlp2s0"
+#define NUM_OF_DEVICES 10
 
 typedef enum logging { LOG_ON = 1 , LOG_OFF = 0 } _logs;
 
@@ -30,8 +31,6 @@ uint8_t tcp_server_accept( int* newSocket_ , struct sockaddr_in* newAddr , _logs
 uint8_t tcp_server_send( int sockfd , char* w_buf );
 uint8_t tcp_server_recv( int sockfd , char* r_buf );
 void getIP( char* IPaddr , _logs log );
-
-extern const uint8_t NUM_OF_DEVICES;
 
 extern int sockfd;
 extern struct sockaddr_in serverAddr;
