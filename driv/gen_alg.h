@@ -20,6 +20,9 @@
 #define PI acos(-1.0f)
 #define GENE_LEN 3
 
+#define EXECUTE_ALGORITHM       "EXEC"
+#define SEND_RESULT             "SENDR"
+
 // Chromosome structure:
 //      genetic_code -> gene (array of Kp, Ti, Td)
 //      fitness -> Fitness value of the gene
@@ -102,6 +105,7 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] );
 
 // Driver thread execute function
 void* gen_alg_driv_exec( void* vargp );
+void sig_handler( int sig );
 
 // Global parameters structure, necessary to define
 extern const _parameters params;

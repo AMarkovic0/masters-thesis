@@ -6,6 +6,77 @@ const int32_t SIMULATION_SIZE = 2000;
 
 const _parameters params = {0.0f, {0,50}, 5, 0.2f};
 
+void* gen_alg_driv_exec( void* vargp )
+{
+	char* my_name = drivAPI_set_name( DRIV_CLASS );
+        int* conSocket = drivAPI_init_driver( vargp , my_name );
+        char read_buffer[ BUF_SIZE ] = { '\0' };
+	char wbuf_broker[ BUF_SIZE ] = { '\0' };
+
+        while( 1 )
+        {
+                drivAPI_read_network( *conSocket , read_buffer );
+		printf( "Read msg: %s \r\n" , read_buffer );
+		if( 0 == strcmp( read_buffer , EXECUTE_ALGORITHM ) )
+		{
+			printf( "%s Executing algorithmi\r\n" , my_name );
+
+			clock_t t_begin = clock();
+			srand((int32_t)time(0));
+
+			// Initialize population and selected chromosome arrays
+			_chromosome population[GENERATION_SIZE];
+			_chromosome selected[REPRODUCTION_SIZE];
+
+			// Initialize global best chromosome
+			_chromosome GLOBAL_BEST;
+
+			// Perform algorithm and find global best chromosome
+			GLOBAL_BEST = best_global_chromosome(population, selected, &calculate_fitness);
+
+			// Print Chromosome values and fitness function
+			printf("Fitness function of the best chromosome: %.8f \r\n", GLOBAL_BEST.fitness);
+			for(int32_t j = 0; j < GENE_LEN; j++)
+				printf("%f ", GLOBAL_BEST.genetic_code[j]);
+			printf("\r\n");
+
+			// Stop timer and print executing time
+			clock_t t_end = clock();
+			double Time = (double)(t_end - t_begin) / CLOCKS_PER_SEC;
+			printf("Execition time: %f[s]\n", Time);
+
+			sprintf( wbuf_broker , "Values: %f %f %f" ,
+					GLOBAL_BEST.genetic_code[ 0 ] ,
+					GLOBAL_BEST.genetic_code[ 1 ] ,
+					GLOBAL_BEST.genetic_code[ 2 ] );
+			drivAPI_send_broker( *conSocket , "D2" , wbuf_broker );
+
+		}
+		else if( 0 == strcmp( read_buffer , SEND_RESULT ) )
+		{
+			printf( "%s Sending results \r\n" , my_name );
+
+			drivAPI_send_network( *conSocket , wbuf_broker );
+		}
+		else
+		{
+			printf( "Else \r\n" );
+		}
+
+		memset( read_buffer , 0 , sizeof( read_buffer ) );
+		sleep( 1 );
+        }
+
+        return NULL;
+}
+
+void sig_handler( int sig )
+{
+	if( sig == 99 )
+		printf( "RECEIVED SIGNAL %d \r\n" , sig );
+	return;
+}
+
 /* **************************************************************************************************************************
  *
  * FUNCTION DEFINITION PART
@@ -266,6 +337,7 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
         return fitness_value;
 }
 
+/*
 void* gen_alg_driv_exec( void* vargp )
 {
 	char msgq[ 255 ] = { '\0' };
@@ -281,10 +353,6 @@ void* gen_alg_driv_exec( void* vargp )
         // Initialize global best chromosome
         _chromosome GLOBAL_BEST;
 
-	while( 0 == strlen( msgq ) )
-		drivAPI_read_network( msgq );
-	printf( "%s \r\n" , msgq );
-
         // Perform algorithm and find global best chromosome
         GLOBAL_BEST = best_global_chromosome(population, selected, &calculate_fitness);
 
@@ -297,7 +365,7 @@ void* gen_alg_driv_exec( void* vargp )
         // Stop timer and print executing time
         clock_t t_end = clock();
         double Time = (double)(t_end - t_begin) / CLOCKS_PER_SEC;
-        printf("Time taken: %f[s]\n", Time);
+        printf("Execition time: %f[s]\n", Time);
 
 	sprintf( msgq , "Values: %f %f %f \r\n" ,
 			GLOBAL_BEST.genetic_code[ 0 ] ,
@@ -308,4 +376,5 @@ void* gen_alg_driv_exec( void* vargp )
         // Execute genetic algorithm
         return NULL;
 }
+*/
 
