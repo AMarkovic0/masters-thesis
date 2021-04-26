@@ -11,5 +11,8 @@ all: app
 app:
 	$(CC) $(CFLAGS) $(OUTFILE) $(CFILES) $(LIBS) $(HDIR)
 
+run:
+	 systemd-run --scope -p CPUQuota=100% ./main
+
 clear:
 	rm *.o
