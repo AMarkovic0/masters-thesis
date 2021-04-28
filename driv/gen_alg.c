@@ -49,7 +49,7 @@ void* gen_alg_driv_exec( void* vargp )
 					GLOBAL_BEST.genetic_code[ 0 ] ,
 					GLOBAL_BEST.genetic_code[ 1 ] ,
 					GLOBAL_BEST.genetic_code[ 2 ] );
-			drivAPI_send_broker( *conSocket , "D2" , wbuf_broker );
+			drivAPI_send_broker( *conSocket , "D1" , wbuf_broker );
 
 		}
 		else if( 0 == strcmp( read_buffer , SEND_RESULT ) )
@@ -68,6 +68,17 @@ void* gen_alg_driv_exec( void* vargp )
         }
 
         return NULL;
+}
+
+void gen_alg_driv_handler( int sig )
+{
+	char rbuf_broker[ BUF_SIZE ] = { '\0' };
+
+	printf( "SIGNAL %d \r\n" , sig );
+	drivAPI_read_broker( rbuf_broker , "D1" );
+	printf( "Received from broker: %s \r\n" , rbuf_broker );
+
+	return;
 }
 
 void sig_handler( int sig )

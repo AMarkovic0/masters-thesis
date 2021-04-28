@@ -105,7 +105,7 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] );
 
 // Driver thread execute function
 void* gen_alg_driv_exec( void* vargp );
-void sig_handler( int sig );
+void gen_alg_driv_handler( int sig );
 
 // Global parameters structure, necessary to define
 extern const _parameters params;

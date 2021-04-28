@@ -39,7 +39,7 @@ typedef struct broker_queue
 int broker_setup( void );
 
 void brokerQ_push( int from , int to , char msg[ ] );
-int brokerQ_pop( char* msg );
+int brokerQ_pop( char* msg , int* from , int* to );
 uint8_t brokerQ_isempty( void );
 
 void drivList_add( int driver_id , pthread_t thread_id , char name[ ] );
@@ -50,8 +50,6 @@ extern pthread_mutex_t lockQ;
 extern pthread_mutex_t lockList;
 
 extern _brokerQ broker;
-extern _drivList driver_list;
-
 extern _drivList* drivers_list;
 
 #endif //BROKER
