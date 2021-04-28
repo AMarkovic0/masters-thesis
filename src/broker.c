@@ -4,8 +4,6 @@ pthread_mutex_t lockQ;
 pthread_mutex_t lockList;
 
 _brokerQ broker;
-_drivList driver_list;
-
 _drivList* drivers_list;
 
 int broker_setup( void )
@@ -60,7 +58,7 @@ void brokerQ_push( int from , int to , char msg[ ] )
 	return;
 }
 
-int brokerQ_pop( char* msg )
+int brokerQ_pop( char* msg , int* from , int* to )
 {
 
 	if( 0 == broker.size )
@@ -68,7 +66,9 @@ int brokerQ_pop( char* msg )
 
 	pthread_mutex_lock( &lockQ );
 
-	sprintf( msg , "<%s><%d><%d>" , broker.head->msg , broker.head->from ,broker.head->to );
+	sprintf( msg , "<%s>" , broker.head->msg );
+	*from = broker.head->from;
+	*to = broker.head->to;
 	_drivMsg* next = broker.head->next;
 	free( broker.head );
 	broker.head = next;
