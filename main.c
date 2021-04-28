@@ -41,22 +41,31 @@ int main( int argc , char* argv[ ] )
 void* broker_exec( void* vargp )
 {
 	char rmsg[ BUF_SIZE ] = { '\0' };
-	_drivList driver;
+	int from = 0;
+	int to = 0;
+	_drivList* list = drivers_list;
+
+	signal( SIGUSR1 , gen_alg_driv_handler );
+
 	while( 1 )
 	{
 		if( !brokerQ_isempty( ) )
 		{
-			brokerQ_pop( rmsg );
+			brokerQ_pop( rmsg , &from , &to );
 			if( 0 != rmsg[ 0 ] )
 			{
-				printf( "%s" , rmsg );
+				printf( "%s %d %d \r\n" , rmsg , from , to );
+				while( ( NULL != list ) && ( list->driver_id != to ) )
+					list = list->next;
+				if( NULL != list )
+				{
+					strcat( list->msg , rmsg );
+					pthread_kill( thread_id[ 1 ] , SIGUSR1 );
+				}
+				list = drivers_list;
 				memset( rmsg, 0 , sizeof( rmsg ) );
-				// Parse XML/JSON
-			}
-			else
-			{
-				driver = drivList_find( "D1" );
-				pthread_kill( thread_id[ 1 ] , 99 );
+				from = 0;
+				to = 0;
 			}
 			sleep( 1 );
 		}
@@ -64,3 +73,4 @@ void* broker_exec( void* vargp )
 
 	return NULL;
 }
+
