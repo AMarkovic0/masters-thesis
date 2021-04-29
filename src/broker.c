@@ -66,7 +66,7 @@ int brokerQ_pop( char* msg , int* from , int* to )
 
 	pthread_mutex_lock( &lockQ );
 
-	sprintf( msg , "<%s>" , broker.head->msg );
+	sprintf( msg , "%s" , broker.head->msg );
 	*from = broker.head->from;
 	*to = broker.head->to;
 	_drivMsg* next = broker.head->next;
@@ -153,7 +153,7 @@ pthread_t drivList_del( char name[ ] )
 
 }
 
-_drivList drivList_find( char name[ ] )
+_drivList* drivList_find( char name[ ] )
 {
 	pthread_mutex_lock( &lockList );
 
@@ -162,7 +162,7 @@ _drivList drivList_find( char name[ ] )
 	if( NULL == tmp )
 	{
 		pthread_mutex_unlock( &lockList );
-		return *drivers_list;
+		return NULL;
 	}
 
 	while( 0 != strcmp( tmp->name , name ) )
@@ -170,13 +170,13 @@ _drivList drivList_find( char name[ ] )
 		if( NULL == tmp->next )
 		{
 			pthread_mutex_unlock( &lockList );
-			return *drivers_list;
+			return NULL;
 		}
 		tmp = tmp->next;
 	}
 
 	pthread_mutex_unlock( &lockList );
 
-	return *tmp;
+	return tmp;
 }
 

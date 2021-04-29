@@ -44,7 +44,7 @@ uint8_t brokerQ_isempty( void );
 
 void drivList_add( int driver_id , pthread_t thread_id , char name[ ] );
 pthread_t drivList_del( char name[ ] );
-_drivList drivList_find( char name[ ] );
+_drivList* drivList_find( char name[ ] );
 
 extern pthread_mutex_t lockQ;
 extern pthread_mutex_t lockList;
