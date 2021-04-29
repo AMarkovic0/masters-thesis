@@ -26,16 +26,17 @@ void drivAPI_send_broker( int conSocket , char to_name[ ] , char msg[ ] )
 
 int drivAPI_read_broker( char msg[ ] , char* my_name )
 {
-	_drivList tmp = drivList_find( my_name );
-	strcpy( msg , tmp.msg );
+	_drivList* tmp = drivList_find( my_name );
+	strcpy( msg , (*tmp).msg );
+	memset( (*tmp).msg , 0 , sizeof( BUF_SIZE ) );
 
-	return tmp.driver_id;
+	return (*tmp).driver_id;
 }
 
 int drivAPI_get_drivID( char name[ ] )
 {
-	_drivList tmp = drivList_find( name );
-	return tmp.driver_id;
+	_drivList* tmp = drivList_find( name );
+	return (*tmp).driver_id;
 }
 
 void drivAPI_send_network( int conSocket , char msg[ ] )

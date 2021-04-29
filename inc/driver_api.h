@@ -4,8 +4,6 @@
 #include "broker.h"
 #include "tcp_server.h"
 
-#define DRIV_CLASS 		"GEN_ALG"
-
 char* drivAPI_set_name( char driv_class[ ] );
 int* drivAPI_init_driver( void* vargp , char* my_name );
 void drivAPI_send_broker( int conSocket , char to_name[ ] , char msg[ ] );
