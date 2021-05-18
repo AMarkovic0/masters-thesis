@@ -88,13 +88,6 @@ void* gen_alg_driv_exec( void* vargp )
 
 void gen_alg_driv_handler( int sig )
 {
-	/*
-	char rbuf_broker[ BUF_SIZE ] = { '\0' };
-
-	printf( "SIGNAL %d \r\n" , sig );
-	drivAPI_read_broker( rbuf_broker , "D1" );
-	printf( "Received from broker: %s \r\n" , rbuf_broker );
-	*/
 	return;
 }
 
