@@ -1,10 +1,12 @@
 #include "broker.h"
 
-pthread_mutex_t lockQ;
-pthread_mutex_t lockList;
-
 _brokerQ broker;
 _drivList* drivers_list;
+
+// Mjuteks promenljiva koja sinhronizuje pristup broker redu
+static pthread_mutex_t lockQ;
+// Mjuteks promenljiva koja sinhronizuje pristup drajver listi
+static pthread_mutex_t lockList;
 
 int broker_setup( void )
 {
