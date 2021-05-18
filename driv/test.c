@@ -8,9 +8,11 @@ void* test_driv_exec( void* vargp )
         char write_buffer[ BUF_SIZE ] = { '\0' };
 	char wbuf_broker[ BUF_SIZE ] = { '\0' };
 	char rbuf_broker[ BUF_SIZE ] = { '\0' };
+	struct pollfd pfds = { *conSocket , POLLIN };
 
         while( 1 )
         {
+		poll( &pfds, 1 , -1 );
                 drivAPI_read_network( *conSocket , read_buffer );
 		if( 0 == strcmp( read_buffer , "START" ) )
 		{

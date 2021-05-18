@@ -15,6 +15,8 @@
 #include<stdint.h>
 #include<math.h>
 
+#include<poll.h>
+
 #include "driver_api.h"
 
 #define PI acos(-1.0f)

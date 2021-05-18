@@ -14,6 +14,8 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
+#include<poll.h>
+
 #include "driver_api.h"
 
 void* test_driv_exec( void* vargp );
