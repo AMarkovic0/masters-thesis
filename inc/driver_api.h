@@ -1,8 +1,9 @@
 #ifndef _DRIVER_API_
 #define _DRIVER_API_
 
-#include "broker.h"
-#include "tcp_server.h"
+// Uvoz neophodnih nestandardnih biblioteka
+#include "broker.h"	// Sadrzi definicije i deklaracije neophodne za rad brokera
+#include "tcp_server.h" // Sadrzi definicije i deklaracije neophodne za TCP komunikaciju
 
 char* drivAPI_set_name( char driv_class[ ] );
 int* drivAPI_init_driver( void* vargp , char* my_name );
