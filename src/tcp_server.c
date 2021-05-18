@@ -1,7 +1,7 @@
 #include "tcp_server.h"
 
-int sockfd;
-struct sockaddr_in serverAddr;
+static int sockfd;
+static struct sockaddr_in serverAddr;
 
 uint8_t tcp_server_init( char* ip , unsigned int port , _logs log )
 {

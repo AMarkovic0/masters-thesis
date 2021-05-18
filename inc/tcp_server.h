@@ -32,7 +32,4 @@ uint8_t tcp_server_send( int sockfd , char* w_buf );
 uint8_t tcp_server_recv( int sockfd , char* r_buf );
 void getIP( char* IPaddr , _logs log );
 
-extern int sockfd;
-extern struct sockaddr_in serverAddr;
-
 #endif // _TCP_SERVER_H_
