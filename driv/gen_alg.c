@@ -1,10 +1,10 @@
 #include"gen_alg.h"
 
-const int32_t GENERATION_SIZE = 100;
-const int32_t REPRODUCTION_SIZE = 50;
-const int32_t SIMULATION_SIZE = 2000;
+static const int32_t GENERATION_SIZE = 100;
+static const int32_t REPRODUCTION_SIZE = 50;
+static const int32_t SIMULATION_SIZE = 2000;
 
-const _parameters params = {0.0f, {0,50}, 5, 0.2f};
+static const _parameters params = {0.0f, {0,50}, 5, 0.2f};
 
 void* gen_alg_driv_exec( void* vargp )
 {

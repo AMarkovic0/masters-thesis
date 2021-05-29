@@ -8,6 +8,9 @@
  * Date: May 2020
 **************************************************************************************************************** */
 
+#ifndef _GEN_ALG_H_
+#define _GEN_ALG_H
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -109,10 +112,4 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] );
 void* gen_alg_driv_exec( void* vargp );
 void gen_alg_driv_handler( int sig );
 
-// Global parameters structure, necessary to define
-extern const _parameters params;
-
-// Array size parameters:
-extern const int32_t GENERATION_SIZE;  		// Size of a generation
-extern const int32_t REPRODUCTION_SIZE;		// Size of selected genes for reproduction
-extern const int32_t SIMULATION_SIZE;		// Size of the simulation time array
+#endif
