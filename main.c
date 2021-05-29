@@ -9,6 +9,7 @@
 char myIP[ MAX_IP_SIZE ];
 
 void* broker_exec( void* vargp );
+void broker_handler( int sig );
 
 pthread_t thread_id[ NUM_OF_DEVICES ];
 int newSocket[ NUM_OF_DEVICES ];
@@ -23,6 +24,7 @@ int main( int argc , char* argv[ ] )
 	tcp_server_listen( LOG_ON );
 
 	pthread_create( &thread_id[ 0 ] , NULL , &broker_exec , NULL );
+	broker_thread = &thread_id[ 0 ];
 
 	tcp_server_accept( &newSocket[ 1 ] , &newAddr[ 1 ] , LOG_ON );
 	pthread_create( &thread_id[ 1 ] , NULL , &gen_alg_driv_exec , (void*)&newSocket[ 1 ] );
@@ -45,9 +47,13 @@ void* broker_exec( void* vargp )
 	char rmsg[ BUF_SIZE ] = { '\0' };
 	int from = 0;
 	int to = 0;
+	int sig;
+	sigset_t* set = NULL;
 	_drivList* list = drivers_list;
 
 	signal( SIGUSR1 , gen_alg_driv_handler );
+	sigemptyset( set );
+	sigaddset( set , SIGUSR1 );
 
 	while( 1 )
 	{
@@ -80,7 +86,10 @@ void* broker_exec( void* vargp )
 				from = 0;
 				to = 0;
 			}
-			sleep( 1 );
+		}
+		else
+		{
+			sigwait( set , &sig );
 		}
 	}
 

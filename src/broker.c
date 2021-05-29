@@ -2,6 +2,7 @@
 
 _brokerQ broker;
 _drivList* drivers_list;
+pthread_t* broker_thread;
 
 // Mjuteks promenljiva koja sinhronizuje pristup broker redu
 static pthread_mutex_t lockQ;

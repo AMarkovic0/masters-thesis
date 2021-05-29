@@ -11,7 +11,7 @@ char* drivAPI_set_name( char driv_class[ ] )
 
 int* drivAPI_init_driver( void* vargp , char* my_name )
 {
-	int* conSocket = (int*)calloc( NAME_SIZE , sizeof( int ) );
+	int* conSocket = (int*)calloc( 1 , sizeof( int ) );
 	*conSocket = *( (int*)vargp );
 	drivList_add( *conSocket , pthread_self( ) , my_name );
 

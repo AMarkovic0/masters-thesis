@@ -131,6 +131,8 @@ _drivList* drivList_find( char name[ ] );
 extern _brokerQ broker;
 // Drajver lista sadrzi informacije o aktivnim drajverima i poruke od brokera prema drajveru
 extern _drivList* drivers_list;
+// Pointer that holds broker thread id
+extern pthread_t* broker_thread;
 
 #endif //BROKER
 
