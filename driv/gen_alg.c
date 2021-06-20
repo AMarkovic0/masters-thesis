@@ -16,11 +16,9 @@ void* gen_alg_driv_exec( void* vargp )
 	char rbuf_broker[ BUF_SIZE ] = { '\0' };
 	struct pollfd pfds = { *conSocket , POLLIN };
 
-	// Initialize population and selected chromosome arrays
 	_chromosome population[GENERATION_SIZE];
 	_chromosome selected[REPRODUCTION_SIZE];
 
-	// Initialize global best chromosome
 	_chromosome GLOBAL_BEST;
 
 	while( 1 )
@@ -34,16 +32,13 @@ void* gen_alg_driv_exec( void* vargp )
 			clock_t t_begin = clock();
 			srand((int32_t)time(0));
 
-			// Perform algorithm and find global best chromosome
 			GLOBAL_BEST = best_global_chromosome(population, selected, &calculate_fitness);
 
-			// Print Chromosome values and fitness function
 			printf("Fitness function of the best chromosome: %.8f \r\n", GLOBAL_BEST.fitness);
 			for(int32_t j = 0; j < GENE_LEN; j++)
 				printf("%f ", GLOBAL_BEST.genetic_code[j]);
 			printf("\r\n");
 
-			// Stop timer and print executing time
 			clock_t t_end = clock();
 			double Time = (double)(t_end - t_begin) / CLOCKS_PER_SEC;
 			printf("Execition time: %f[s]\n", Time);
@@ -93,13 +88,6 @@ void gen_alg_driv_handler( int sig )
 	return;
 }
 
-
-/* **************************************************************************************************************************
- *
- * FUNCTION DEFINITION PART
- *
- * ************************************************************************************************************************* */
-
 int32_t randomX(int32_t lower, int32_t upper)
 {
 	return (rand() % (upper - lower + 1)) + lower;
@@ -146,12 +134,6 @@ void Qsort(_chromosome* arr, int32_t low, int32_t high)
 
 	return;
 }
-
-/*****************************************************************************************************
- *
- * ALGORITHM FUNCTION DEFINITION PART
- *
- * ************************************************************************************************** */
 
 void initial_population(_chromosome* init_pop, float (*fitness_function)(float*))
 {
@@ -212,11 +194,24 @@ void create_generation(_chromosome* selected_population, _chromosome* generation
 		}while(random_samples[0] == random_samples[1]);
 		random_breaking_point = randomX(0, GENE_LEN - 1);
 
-		//Copy result of crossover between two selected genes in child1 and child2, first crossover places part of parent2 into parent1
-		//and second crossover places part of parent1 into parent2 (because working with pointers, we need tmp to save parrent1 values for second crossover):
-		memcpy(tmp, selected_population[random_samples[0]].genetic_code, GENE_LEN*sizeof(float));
-		memcpy(child1, crossover(selected_population[random_samples[0]].genetic_code,selected_population[random_samples[1]].genetic_code, random_breaking_point),GENE_LEN*sizeof(float));
-		memcpy(child1, crossover(selected_population[random_samples[0]].genetic_code, tmp, random_breaking_point),GENE_LEN*sizeof(float));
+		memcpy(
+			tmp,
+			selected_population[random_samples[0]].genetic_code,
+			GENE_LEN*sizeof(float)
+		);
+		memcpy(
+			child1,
+			crossover(selected_population[random_samples[0]].genetic_code,
+			selected_population[random_samples[1]].genetic_code,
+			random_breaking_point),
+			GENE_LEN*sizeof(float)
+		);
+		memcpy(
+			child1,
+			crossover(selected_population[random_samples[0]].genetic_code,
+			tmp, random_breaking_point),
+			GENE_LEN*sizeof(float)
+		);
 
 		memcpy(generation[i].genetic_code, child1, GENE_LEN*sizeof(float));
 		generation[i].fitness = (*fitness_function)(child1);
@@ -249,19 +244,6 @@ _chromosome best_global_chromosome(_chromosome* population, _chromosome* selecte
 		}
 
 		create_generation(selected, population, fitness_function);
-
-		//Unclomment to print selected chromosomes for each iteration
-		/*
-		for(int32_t m = 0; m < REPRODUCTION_SIZE; m++)
-		{
-			printf("Chromosome: %.8f\n", selected[m].fitness);
-			for(int32_t j = 0; j < GENE_LEN; j++)
-				printf("%f ", selected[m].genetic_code[j]);
-			printf("\n");
-		}
-		printf("\n\n\n\n\n");
-		*/
-
 		counter++;
 	}
 
@@ -271,9 +253,8 @@ _chromosome best_global_chromosome(_chromosome* population, _chromosome* selecte
 float calculate_fitness( float genetic_code[ GENE_LEN ] )
 {
 	float fitness_value = 0.0f;
-	float dt = 0.0002f; // dt value IMPORTANT VARIABLE 0.0002
+	float dt = 0.0002f;
 
-	// System parameters:
 	float Vmax = 10.0f;
 	float Vmin = -10.0f;
 	float C1 = 0.1284f/0.0021f;
@@ -281,7 +262,6 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 
 	float omega_z = PI/2.0f;
 
-	// System variables:
 	float errX = omega_z;
 	float err_int = 0.0f;
 	float err_dot = 0.0f;
@@ -300,17 +280,14 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 	float sum = 0.0f;
 	for(int32_t i = 0; i < SIMULATION_SIZE-1; i++)
 	{
-		// Error calculations:
 		errX =	omega_z - omega[1];
 		err_int = err_int + errX*dt;
 		err_dot = (errX - (omega_z - omega[0]))/dt;
 
 		if(i % 10 == 0 || i == 0)
 		{
-			// Calculate control (PID):
 			Vp = Kp*(errX + 1/Ti*err_int + Td*err_dot);
 
-			// Anti-windup implementation
 			if(Vp > Vmax)
 			{
 				err_int = err_int + (-Vp + Vmax);
@@ -322,19 +299,16 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 				Vp = Kp*(errX + 1/Ti*err_int + Td*err_dot);
 			}
 
-			// Low-pass filter:
 			Udot = 1/(40*PI)*Vp - 1/(40*PI)*U;
 			U = U + Udot*0.002;
 			Vp = U;
 
 		}
 
-		// Solve equations:
 		theta_dot = C1*Vp - C2*theta;
 		theta = theta + theta_dot*dt;
 		omega[2] = omega[1] + theta*dt;
 
-		// Shift time:
 		omega[0] = omega[1];
 		omega[1] = omega[2];
 		omega[2] = 0;
@@ -345,53 +319,10 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 			sum = sum + errX*100.0f;
 	}
 
-	// Calculate fitness:
 	fitness_value = params.target - sum/SIMULATION_SIZE;
-	// If NaN, discard
 	if(fitness_value != fitness_value)
 		fitness_value = -100000.0f;
 
 	return fitness_value;
 }
-
-/*
-void* gen_alg_driv_exec( void* vargp )
-{
-	char msgq[ 255 ] = { '\0' };
-	clock_t t_begin = clock();
-
-	drivAPI_init_driver( vargp , "DRIVER1" );
-	srand((int32_t)time(0));
-
-	// Initialize population and selected chromosome arrays
-	_chromosome population[GENERATION_SIZE];
-	_chromosome selected[REPRODUCTION_SIZE];
-
-	// Initialize global best chromosome
-	_chromosome GLOBAL_BEST;
-
-	// Perform algorithm and find global best chromosome
-	GLOBAL_BEST = best_global_chromosome(population, selected, &calculate_fitness);
-
-	// Print Chromosome values and fitness function
-	printf("Fitness function of the best chromosome: %.8f\n", GLOBAL_BEST.fitness);
-	for(int32_t j = 0; j < GENE_LEN; j++)
-		printf("%f ", GLOBAL_BEST.genetic_code[j]);
-	printf("\n");
-
-	// Stop timer and print executing time
-	clock_t t_end = clock();
-	double Time = (double)(t_end - t_begin) / CLOCKS_PER_SEC;
-	printf("Execition time: %f[s]\n", Time);
-
-	sprintf( msgq , "Values: %f %f %f \r\n" ,
-			GLOBAL_BEST.genetic_code[ 0 ] ,
-			GLOBAL_BEST.genetic_code[ 1 ] ,
-			GLOBAL_BEST.genetic_code[ 2 ] );
-	drivAPI_send_broker( "DRIVER0" , msgq );
-
-	// Execute genetic algorithm
-	return NULL;
-}
-*/
 

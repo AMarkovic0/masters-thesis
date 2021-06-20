@@ -1,11 +1,11 @@
 /* **************************************************************************************************************
- * Genetic algorithm library header. This software was made as a part of the PID controller tuning program.
- * The code is has been written in ANSI C, all memory is allocated staticaly using data types of constant size.
- * The library use floating point aritmetic.
- * This software is free to use.
- *
- * Created by: Aleksa Markovic
- * Date: May 2020
+* gen_alg.h je fajl koji sadrzi preprocesorske instrukcije i deklaracije za isvrsavanje upravljackog
+* dela programa za kontrolu motora jednosmerne struje. Radi pravilnog koriscenja ovog fajla, neophodno je
+* da program sadrzi definicije drajver aplikativnog interfejsa. Pored deklaracija za izvrsavanje logike
+* upravljackog programa, ovaj fajl sadrzi i predefinisane deklaracije za interfejs integracije sa brokerom
+* i ostalim upravljackim delovima programa.
+*
+* Kreator: Aleksa Markovic
 **************************************************************************************************************** */
 
 #ifndef _GEN_ALG_H_
@@ -20,96 +20,120 @@
 
 #include<poll.h>
 
-#include "driver_api.h"
+#include "driver_api.h" // Drajver aplikativni interfejs
 
 #define PI acos(-1.0f)
 #define GENE_LEN 3
 
-#define EXECUTE_ALGORITHM       "EXEC"
-#define SEND_RESULT             "SENDR"
+// Komande:
+#define EXECUTE_ALGORITHM	"EXEC"
+#define SEND_RESULT		"SENDR"
 
-// Chromosome structure:
-//      genetic_code -> gene (array of Kp, Ti, Td)
-//      fitness -> Fitness value of the gene
+/*
+* Hromozom struktura:
+*      genetic_code	-> gen (niz elemenata: Kp, Ti, Td)
+*      fitness	-> Vrednost funkcije prilagodjenosti
+*/
 typedef struct Chromosome
 {
-        float genetic_code[GENE_LEN];
-        float fitness;
+	float genetic_code[GENE_LEN];
+	float fitness;
 }_chromosome;
 
-// Algorithm parameters structure:
-//      target -> Wanted value of the fitness function
-//      possibile_gene_values -> min and max number gene elements could take
-//      max_itterations -> maximal number of iterations (generations created)
-//      mutation_rate -> chanse to perform mutation on some chromosome
+/*
+* Struktura za cuvanje parametara algoritma:
+*      target			-> Zeljena vrednost funkcije prilagodjenosti
+*      possibile_gene_values	-> Opseg vrednosti elemenata genetskog koda
+*      max_itterations		-> Maksimalni broj iteracija
+*      mutation_rate		-> Sansa za mutaciju gena
+*/
 typedef struct AlgorithmParameters
 {
-        float target;
-        int possible_gene_values[2];
-        int max_iterations;
-        float mutation_rate;
+	float target;
+	int possible_gene_values[2];
+	int max_iterations;
+	float mutation_rate;
 }_parameters;
 
-// ADITIONAL FUNCTIONS:
-//
-// Random number generator:
-//      Generator seed is called in main function (based on CPU clock)
-//      Input:
-//              lower -> integer value of min number function can generate
-//              upper -> integer value of max number function can generate
-//      Output:
-//              generated random integer
+// Dodatne funkcije:
+
+/*
+* Generator pseudo nasumicnih brojeva iz opsega:
+*      Neophodno je inicijalizovati seme generatora u glavnoj funkciji
+*      Ulazni argumenti:
+*	       int lower -> Donja granica opsega generatora
+*	       int upper -> Gornja granica opsega generatora
+*      Izlazni argument:
+*	       int out	  -> Pseudo nasumicno generisan broj
+*/
 int randomX(int lower, int upper);
-//
-// Quick sort algorithm function set (sorting from bigger to smaller):
+
+// Deklaracije algoritma za sortiranje quick sort
 void swap(_chromosome* a, _chromosome* b);
 int Qsort_partition(_chromosome* arr, int low, int high);
 void Qsort(_chromosome* arr, int low, int high);
 
-// GENETIC ALGORITHM FUNCTION SET:
-//
-// Function which creates initial chromosome population - creates random genes and calculates fitness for each gene
-//      Input:
-//              init_pop -> array of chromosome where population chromosomes will be stored
-//              fitness_function -> pointer (addres) to fitness function
+// Set funkcija genetskog algoritma:
+
+/*
+* Funkcija kreira inicijalnu populaciju hromozoma. Kreiranje se izvrsava pseudo nasumicno.
+*	Ulazni argumenti:
+*		_chromosome* init_pop -> Niz hromozoma koji ce sadrzati gnerisane genetske kodove
+*		float (*fun)(float*)  -> Adresa funckije prilagodjenosti
+*/
 void initial_population(_chromosome* init_pop, float (*fitness_function)(float*));
-//
-// Function selectes population for reproduction (n best chromosomes). Sorting is included (Quick sort)
-//      Input:
-//              population -> array of defined chromosomes
-//              selected -> array of chromosomes where selected population will be stored
+
+/*
+* Funkcija za sortiranje jedinki i selekciju n najboljih uzoraka
+*	Ulazni argumenti:
+*		_chromosome* population -> Niz definisanih jedinki za selekciju
+*		_chromosome* selected 	-> Niz koji ce sadrzati izabrane jedinke
+*/
 void selection(_chromosome* population, _chromosome* selected);
-//
-// Performs crossover combination of two float arrays (genes in our case)
-//      Input:
-//              parent1 -> float array of parent1 values (first gene)
-//              patent2 -> float array of perent2 values (second gene)
-//              break_point -> element of parent arrays where parent arrays will be broken and mixed
-//      Output:
-//              float array of with mixed gene values
-//      NOTE: Function returns only one gene [parent1[0:break_point], parent2[break_point:end]]
+
+/*
+* Funkcija koja koja izvrsava kombinovanje gena roditelja 1 i 2 na prelomnom elementu
+*	Ulazni argumenti:
+*		float parent1[] -> Roditelj 1 - niz elemenata float
+*		float patent2[] -> Roditelj 2 - niz elemenata float
+*		break_point 	-> Element na kom se hromozom deli i kombinuje
+*	Izlazni argument:
+*		float* out 	-> Genetski kod nove jedinke
+*	NOTE: Funkcija vraca genetski kod samo jedne jedinke
+*	      [parent1[0:break_point], parent2[break_point:end]]
+*/
 float* crossover(float parent1[GENE_LEN], float parent2[GENE_LEN], int brek_point);
-//
-// Creates new generation from selected chromosomes
-//      Input:
-//              selected_population -> population selected in selection function
-//              generation -> chromosome array where new generation will be stored
-//              fitness_function
+
+/*
+* Funkcija kreira novu generaciju jedniki na osnovu izabranih jedinki
+*	Ulazni argumenti:
+*		_chromosome* selected_population -> Izabrana populacija jedinki
+*		_chromosome* generation 	 -> Niz jedinki nove generacije
+*		float (*fun)(float*)  		 -> Adresa funckije prilagodjenosti
+*/
 void create_generation(_chromosome* selected_population, _chromosome* generation, float (*fitness_function)(float*));
-//
-// Function performs algorithm, creates generations and prforms selection. Returns global best chromosome after all iterations
-//      Input:
-//              population -> initialized chromosome array where population of each generation will be stored
-//              selected -> initialized chromosome array where selected chromosomes for reproduction will be stored
-//              fitness_funtion -> function which calculates fitness
-//      Output:
-//              Global best chromosome
+
+/*
+* Funkcija koja izvrsava ceo algoritam i vraca globalno najbolju jedinku.
+*	Ulazni argumenti:
+*		_chromosome* population -> Niz jedinki koji cuva jedinke svake generacije. Sledeca generacija zamenjuje
+*					   trenutnu
+*		_chromosome* selected 	-> Niz jedniki koj cuva izabrane jedinke svake generacije. Sledeca generacija
+*					   zamenjuje trenutnu
+*		float (*fun)(float*)  	-> Adresa funckije prilagodjenosti
+*	Izlazni argument:
+*		_chromosome out		-> Globalno najprilagodjenjija jedinka
+*/
 _chromosome best_global_chromosome(_chromosome* population, _chromosome* selected, float (*fitness_function)(float*));
 
+// Funkcija prilagodjenosti
 float calculate_fitness( float genetic_code[ GENE_LEN ] );
 
-// Driver thread execute function
+// Deklaracije integrisanja u sistem
+
+// Funkcija drajver niti
 void* gen_alg_driv_exec( void* vargp );
+// Signal hendler
 void gen_alg_driv_handler( int sig );
 
-#endif
+#endif	// GEN_ALG
