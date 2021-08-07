@@ -12,6 +12,8 @@
 #ifndef _DRIVER_API_
 #define _DRIVER_API_
 
+#include<sys/time.h>
+
 // Uvoz neophodnih nestandardnih biblioteka
 #include "broker.h"	// Sadrzi definicije i deklaracije neophodne za rad brokera
 #include "tcp_server.h" // Sadrzi definicije i deklaracije neophodne za TCP komunikaciju
@@ -77,5 +79,26 @@ void drivAPI_send_network( int conSocket , char msg[ ] );
 *	char msg[]		-> Niz koji cuva sadrzaj primljene poruke
 */
 void drivAPI_read_network( int conSocket , char msg[ ] );
+
+/*
+* Ova funkcija postavlja casovnik koji poziva handler funkciju nakon
+* isteka vremena sec.usec.
+* Ulazni argumenti:
+*	unsinged long int us	-> vreme u us
+*	unsinged long int sec	-> vreme us sekundama
+*	void (*fun)(int)	-> adresa callback funckije
+*	boo repeat		-> postavlja timer ponovo ili ne
+*/
+unsigned int start_timer( unsigned long int us , unsigned long int sec , void (*handler)(int) );
+
+/*
+* Ova funkcija postavlja alarm na ms mikrosekundi. Pozvati ovu funkciju
+* u hendleru za ponovno postavljanje alarma.
+* Ulazni argumenti:
+*	unsigned int ms		-> broj mikrosekundi
+* Izlazni argumenti:
+*	unsigned int		-> 0 u slucaju uspeha, staro vreme u slucaju neuspeha
+*/
+unsigned int alarm_us( unsigned long int us , unsigned long int sec );
 
 #endif // DRIVER_API

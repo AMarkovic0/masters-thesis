@@ -34,18 +34,21 @@ uint8_t id[ 5 ] = { 0 };
 
 int main( int argc , char* argv[] )
 {
-	tcp_client_init( "192.168.1.4" , PORT , LOG_ON );
+	tcp_client_init( "192.168.0.129" , PORT , LOG_ON );
 	tcp_client_connect( LOG_ON );
 	signal( SIGALRM , heartbeat_handler );
+	alarm_us( 100 );
 
 	char msg[ 32 ] = { '\0' };
 	while( 1 )
 	{
 		printf( "Enter: \r\n" );
 		scanf( "%s" , msg );
+		sleep(0.1);
 		send( clientSocket , msg , strlen( msg ) , 0 );
 		recv( clientSocket , buf , BUF_SIZE , MSG_DONTWAIT );
 		printf( "%s \r\n" , buf );
+		memset(buf, 0, BUF_SIZE);
 	}
 
 	return 0;
@@ -53,8 +56,12 @@ int main( int argc , char* argv[] )
 
 void heartbeat_handler( int sig )
 {
-	send( clientSocket , id , strlen( id ) , 0 );
-	alarm_us( 100000 );
+	recv( clientSocket , buf , BUF_SIZE , MSG_DONTWAIT );
+	if ( buf[ 0 ] )
+		printf( "%s \r\n" , buf );
+	memset(buf, 0, BUF_SIZE);
+
+	alarm_us( 100 );
 }
 
 unsigned int alarm_us( unsigned int ms )

@@ -50,3 +50,24 @@ void drivAPI_read_network( int conSocket , char msg[ ] )
 	tcp_server_recv( conSocket , msg );
 	return;
 }
+
+unsigned int start_timer( unsigned long int us , unsigned long int sec , void (*handler)(int) )
+{
+	signal( SIGALRM , handler );
+	return alarm_us( us , sec );
+}
+
+unsigned int alarm_us( unsigned long int us , unsigned long int sec )
+{
+	struct itimerval old, new;
+	new.it_interval.tv_usec = 0;
+  	new.it_interval.tv_sec = 0;
+  	new.it_value.tv_usec = us;
+  	new.it_value.tv_sec = sec;
+  	if (setitimer (ITIMER_REAL, &new, &old) < 0)
+    		return 0;
+  	else
+    		return old.it_value.tv_sec;
+}
+
+
