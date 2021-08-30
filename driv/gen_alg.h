@@ -136,4 +136,6 @@ void* gen_alg_driv_exec( void* vargp );
 // Signal hendler
 void gen_alg_driv_handler( int sig );
 
+float sgn( float x );
+
 #endif	// GEN_ALG

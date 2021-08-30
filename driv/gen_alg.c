@@ -257,8 +257,9 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 
 	float Vmax = 10.0f;
 	float Vmin = -10.0f;
-	float C1 = 0.1284f/0.0021f;
-	float C2 = 0.084f/0.0021f;
+	float C = 0.9 * 0.69 * 0.007 * 70 / 2.6;
+	float Tf = 0.0f;
+	float Tu = 0.0f;
 
 	float omega_z = PI/2.0f;
 
@@ -305,13 +306,19 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 
 		}
 
-		theta_dot = C1*Vp - C2*theta;
+		Tu = Vp * C;
+		Tf = 0.0174*sgn(theta) + 0.0087*exp(-theta/0.064)*sgn(theta) + 0.0721*theta;
+		theta_dot = ( Tu - Tf )/0.0021;
+
 		theta = theta + theta_dot*dt;
 		omega[2] = omega[1] + theta*dt;
 
 		omega[0] = omega[1];
 		omega[1] = omega[2];
 		omega[2] = 0;
+
+		if( errX > 0 )
+			return -100000.0f;
 
 		if(errX < 0)
 			sum = sum - errX/10.0f;
@@ -326,3 +333,9 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 	return fitness_value;
 }
 
+float sgn( float x )
+{
+	if( x < 0 )
+		return -1;
+	return 1;
+}
