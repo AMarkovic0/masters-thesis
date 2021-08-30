@@ -1,8 +1,8 @@
 #include"gen_alg.h"
 
 static const int32_t GENERATION_SIZE = 100;
-static const int32_t REPRODUCTION_SIZE = 50;
-static const int32_t SIMULATION_SIZE = 2000;
+static const int32_t REPRODUCTION_SIZE = 30;
+static const int32_t SIMULATION_SIZE = 7000;
 
 static const _parameters params = {0.0f, {0,50}, 5, 0.2f};
 
@@ -257,7 +257,7 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 
 	float Vmax = 10.0f;
 	float Vmin = -10.0f;
-	float C = 0.9 * 0.69 * 0.007 * 70 / 2.6;
+	float C = 0.9 * 0.69 * 0.007 * 70.0 / 2.6;
 	float Tf = 0.0f;
 	float Tu = 0.0f;
 
@@ -317,13 +317,10 @@ float calculate_fitness( float genetic_code[ GENE_LEN ] )
 		omega[1] = omega[2];
 		omega[2] = 0;
 
-		if( errX > 0 )
-			return -100000.0f;
-
 		if(errX < 0)
-			sum = sum - errX/10.0f;
+			sum = sum - errX*10;
 		else
-			sum = sum + errX*100.0f;
+			sum = sum + errX*100;
 	}
 
 	fitness_value = params.target - sum/SIMULATION_SIZE;
